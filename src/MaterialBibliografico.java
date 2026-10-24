@@ -48,6 +48,6 @@ public class MaterialBibliografico {
     }
 
     public double calcularMulta(int diasRetraso) {
-        return 0.0;
+        return diasRetraso*getMultaDiaria();
     }
 }
