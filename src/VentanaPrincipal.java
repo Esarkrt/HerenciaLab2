@@ -45,10 +45,17 @@ public class VentanaPrincipal extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         
+        modeloTablaMateriales = new DefaultTableModel(new String[]{"Código", "Título", "Tipo", "Año", "Disponible", "Detalle Específico", "Imagen"}, 0);
+        tablaMateriales = new JTable(modeloTablaMateriales);
+
+        modeloTablaPrestamos = new DefaultTableModel(new String[]{"Código", "Título", "Tipo", "Plazo (días)", "Multa/Día", "Disponible"}, 0);
+        tablaPrestamos = new JTable(modeloTablaPrestamos);
+        
         tabbedPane=new JTabbedPane();
         tabbedPane.addTab("Registro", crearPanelRegistro());
         tabbedPane.addTab("Inventario y Búsqueda", crearPaneldeBusqueda());
         tabbedPane.addTab("Préstamos", crearPanelPrestamos());
+        tabbedPane.addTab("Devoluciones", crearPanelDevoluciones());
         
         add(tabbedPane);
         actualizarTabla();
@@ -154,12 +161,12 @@ public class VentanaPrincipal extends JFrame {
 
                     MaterialBibliografico material;
                     if ("Libro".equals(tipo)) {
-                        material = new Libro(codigo, titulo, anio, imagen, datoEsp);
+                        material = new Libro(codigo, titulo, anio,datoEsp,imagen);
                     } else if ("Revista".equals(tipo)) {
                         int numEdicion = Integer.parseInt(datoEsp);
                         material = new Revista(codigo, titulo, anio, numEdicion , imagen );
                     } else {
-                        material = new Tesis(codigo, titulo, anio, imagen, datoEsp);
+                        material = new Tesis(codigo, titulo, anio,datoEsp ,imagen );
                     }
 
                     biblioteca.registrarMaterial(material);
@@ -272,12 +279,58 @@ public class VentanaPrincipal extends JFrame {
 
         return panel;
     }
+    private JPanel crearPanelDevoluciones() {
+    JPanel panel = new JPanel(new BorderLayout(10, 10));
+    panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+    JPanel panelAccion = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+    panelAccion.setBorder(BorderFactory.createTitledBorder("Registrar Devolución"));
+    btnDevolver = new JButton("Devolver Material Seleccionado");
+    panelAccion.add(new JLabel("Seleccione el material a devolver y presione el botón:"));
+    panelAccion.add(btnDevolver);
+    panel.add(panelAccion, BorderLayout.NORTH);
+
+    JScrollPane scroll = new JScrollPane(tablaPrestamos);
+    scroll.setBorder(BorderFactory.createTitledBorder("Estado de Materiales"));
+    panel.add(scroll, BorderLayout.CENTER);
+
+    btnDevolver.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int filaSeleccionada = tablaPrestamos.getSelectedRow();
+            if (filaSeleccionada == -1) {
+                JOptionPane.showMessageDialog(VentanaPrincipal.this, "Seleccione un material de la tabla.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String codigo = (String) modeloTablaPrestamos.getValueAt(filaSeleccionada, 0);
+            try {
+                double multa = biblioteca.devolverMaterial(codigo);
+                String mensaje = "Devolución registrada exitosamente.";
+                if (multa > 0) {
+                    mensaje += "\nSe aplicó una multa por retraso de: $" + String.format("%.2f", multa);
+                }
+                JOptionPane.showMessageDialog(VentanaPrincipal.this, mensaje, "Devolución Exitosa", JOptionPane.INFORMATION_MESSAGE);
+                actualizarTabla();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(VentanaPrincipal.this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    });
+
+    return panel;
+}
+    
 
     private void configurarEventos() {
     }
 
     private void limpiarRegistro(){
-        
+        txtCodigo.setText("");
+        txtTitulo.setText("");
+        txtAnio.setText("");
+        txtDatoEspecifico.setText("");
+        txtImagen.setText("");
+        cmbTipo.setSelectedIndex(0);
     }
     
     private void actualizarCampoEspecifico() {
@@ -299,30 +352,33 @@ public class VentanaPrincipal extends JFrame {
         if (modeloTablaMateriales != null) {
             modeloTablaMateriales.setRowCount(0);
             List<MaterialBibliografico> lista = biblioteca.getMateriales();
-            for (int i = 0; i < lista.size(); i++) {
-                MaterialBibliografico m = lista.get(i);
-                String detalle = "";
-                if (m instanceof Libro) detalle = "Autor: " + ((Libro) m).getAutor();
-                else if (m instanceof Revista) detalle = "Edición: " + ((Revista) m).getNumeroEdicion();
-                else if (m instanceof Tesis) detalle = "Tesista: " + ((Tesis) m).getTesista();
+            if (lista != null) {
+                for (int i = 0; i < lista.size(); i++) {
+                    MaterialBibliografico m = lista.get(i);
+                    String detalle = "";
+                    if (m instanceof Libro) detalle = "Autor: " + ((Libro) m).getAutor();
+                    else if (m instanceof Revista) detalle = "Edición: " + ((Revista) m).getNumeroEdicion();
+                    else if (m instanceof Tesis) detalle = "Tesista: " + ((Tesis) m).getTesista();
 
-                modeloTablaMateriales.addRow(new Object[]{
-                    m.getCodigo(), m.getTitulo(), m.getTipoMaterial(), m.getAnioPublicacion(),
-                    m.isDisponible() ? "Sí" : "No", detalle, m.getRutaImagen()
-                });
+                    modeloTablaMateriales.addRow(new Object[]{
+                        m.getCodigo(), m.getTitulo(), m.getTipoMaterial(), m.getAnioPublicacion(),
+                        m.isDisponible() ? "Sí" : "No", detalle, m.getRutaImagen()
+                    });
+                }
             }
         }
-
         if (modeloTablaPrestamos != null) {
             modeloTablaPrestamos.setRowCount(0);
             List<MaterialBibliografico> lista = biblioteca.getMateriales();
-            for (int i = 0; i < lista.size(); i++) {
-                MaterialBibliografico m = lista.get(i);
-                modeloTablaPrestamos.addRow(new Object[]{
-                    m.getCodigo(), m.getTitulo(), m.getTipoMaterial(),
-                    m.getPlazoPrestamo(), "$" + String.format("%.2f", m.getMultaDiaria()),
-                    m.isDisponible() ? "Sí" : "No"
-                });
+            if (lista != null) {
+                for (int i = 0; i < lista.size(); i++) {
+                    MaterialBibliografico m = lista.get(i);
+                    modeloTablaPrestamos.addRow(new Object[]{
+                        m.getCodigo(), m.getTitulo(), m.getTipoMaterial(),
+                        m.getPlazoPrestamo(), "$" + String.format("%.2f", m.getMultaDiaria()),
+                        m.isDisponible() ? "Sí" : "No"
+                    });
+                }
             }
         }
     }

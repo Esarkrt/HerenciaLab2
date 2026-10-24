@@ -48,15 +48,18 @@ public class Biblioteca {
     }
 
     private MaterialBibliografico buscarRecursivo( String codigo, int indice) {
-         if (indice >= materiales.size()) {
-        return null;
-    }
-    MaterialBibliografico material = materiales.get(indice);
+        if (indice >= materiales.size()) {
+            return null;
+        }
+        MaterialBibliografico material = materiales.get(indice);
 
-    if (material.getCodigo().equalsIgnoreCase(codigo)) {
+        
+        if (material.getCodigo().equalsIgnoreCase(codigo)) {
+            return material; 
+        }
+        
+        
         return buscarRecursivo(codigo, indice + 1);
-    }
-        return null;
     }
 
     public Prestamo buscarPrestamoActivo(String codigo) {
