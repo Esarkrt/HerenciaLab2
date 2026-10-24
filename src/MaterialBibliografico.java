@@ -46,6 +46,9 @@ public class MaterialBibliografico {
     public double getMultaDiaria() {
         return 0.0;
     }
+    public String getTipoMaterial() {
+        return "Estándar";
+    }
 
     public double calcularMulta(int diasRetraso) {
         return diasRetraso*getMultaDiaria();

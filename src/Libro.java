@@ -22,4 +22,8 @@ public class Libro extends MaterialBibliografico {
     public double getMultaDiaria() {
         return 1.50;
     }
+    @Override
+    public String getTipoMaterial() {
+        return "Libro";
+    }
 }

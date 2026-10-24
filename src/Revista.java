@@ -24,4 +24,8 @@ public class Revista extends MaterialBibliografico {
     public double getMultaDiaria() {
         return 0.75;
     }
+    @Override
+    public String getTipoMaterial() {
+        return "Revista";
+    }
 }

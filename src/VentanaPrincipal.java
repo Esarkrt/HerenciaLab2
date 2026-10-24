@@ -17,7 +17,7 @@ public class VentanaPrincipal extends JFrame {
     private JTextField txtAnio;
     private JTextField txtDatoEspecifico;
     private JTextField txtImagen;
-
+    private DefaultTableModel modeloTablaMateriales;
     private JComboBox<String> cmbTipo;
     private SimpleDateFormat dateFormat;
     private JLabel lblDatoEspecifico;
@@ -32,7 +32,8 @@ public class VentanaPrincipal extends JFrame {
     private JButton btnDevolver;
     private JButton btnLimpiar;
     private JButton btnExamImagen;
-
+    private JTextField txtBusquedaCodigo;
+    private JTextArea txtResultadoBusqueda;
     public VentanaPrincipal() {
         biblioteca=new Biblioteca();
         dateFormat=new SimpleDateFormat();
@@ -43,6 +44,9 @@ public class VentanaPrincipal extends JFrame {
         
         tabbedPane=new JTabbedPane();
         tabbedPane.addTab("Registro", crearPanelRegistro());
+        
+        add(tabbedPane);
+        actualizarTabla();
     }
 
     private JPanel crearPanelRegistro() {
@@ -148,7 +152,7 @@ public class VentanaPrincipal extends JFrame {
                         material = new Libro(codigo, titulo, anio, imagen, datoEsp);
                     } else if ("Revista".equals(tipo)) {
                         int numEdicion = Integer.parseInt(datoEsp);
-                        material = new Revista(codigo, titulo, anio, imagen, numEdicion);
+                        material = new Revista(codigo, titulo, anio, numEdicion , imagen );
                     } else {
                         material = new Tesis(codigo, titulo, anio, imagen, datoEsp);
                     }
@@ -165,6 +169,57 @@ public class VentanaPrincipal extends JFrame {
         });
 
         return panelRegistro;
+    }
+    private JPanel crearPaneldeBusqueda(){
+        JPanel panel=new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JPanel panelBusqueda = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        panelBusqueda.setBorder(BorderFactory.createTitledBorder("Búsqueda por Código"));
+        txtBusquedaCodigo = new JTextField(15);
+        JButton btnBuscar = new JButton("Buscar Material");
+        panelBusqueda.add(new JLabel("Código:"));
+        panelBusqueda.add(txtBusquedaCodigo);
+        panelBusqueda.add(btnBuscar);
+        txtResultadoBusqueda = new JTextArea(4, 45);
+        txtResultadoBusqueda.setEditable(false);
+        JScrollPane scrollResultado = new JScrollPane(txtResultadoBusqueda);
+        
+        JPanel panelNorte = new JPanel(new BorderLayout());
+        panelNorte.add(panelBusqueda, BorderLayout.NORTH);
+        panelNorte.add(scrollResultado, BorderLayout.CENTER);
+
+        panel.add(panelNorte, BorderLayout.NORTH);
+
+        modeloTablaMateriales = new DefaultTableModel(new String[]{"Código", "Título", "Tipo", "Año", "Disponible", "Detalle Específico", "Imagen"}, 0);
+        tablaMateriales = new JTable(modeloTablaMateriales);
+        JScrollPane scrollTabla = new JScrollPane(tablaMateriales);
+        scrollTabla.setBorder(BorderFactory.createTitledBorder("Inventario General de Materiales"));
+
+        panel.add(scrollTabla, BorderLayout.CENTER);
+        btnBuscar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String codigo = txtBusquedaCodigo.getText().trim();
+                if (codigo.isEmpty()) {
+                    JOptionPane.showMessageDialog(VentanaPrincipal.this, "Ingrese un código para buscar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                MaterialBibliografico encontrado = biblioteca.buscarPorCodigo(codigo);
+                if (encontrado != null) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Material encontrado mediante búsqueda recursiva\n");
+                    sb.append("Código: ").append(encontrado.getCodigo()).append(" | Título: ").append(encontrado.getTitulo()).append("\n");
+                    sb.append("Tipo: ").append(encontrado.getTipoMaterial()).append(" | Año: ").append(encontrado.getAnioPublicacion()).append("\n");
+                    sb.append("Disponible: ").append(encontrado.isDisponible() ? "Sí" : "No").append("\n");
+                    sb.append("Plazo de Préstamo: ").append(encontrado.getPlazoPrestamo()).append(" días | Multa Diaria: $").append(encontrado.getMultaDiaria());
+                    txtResultadoBusqueda.setText(sb.toString());
+                } else {
+                    txtResultadoBusqueda.setText("El código '" + codigo + "' no se encuentra registrado en el sistema.");
+                }
+            }
+        });
+
+        return panel;
     }
 
     private void configurarEventos() {
@@ -196,5 +251,12 @@ public class VentanaPrincipal extends JFrame {
     }
 
     public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new VentanaPrincipal().setVisible(true);
+            }
+        });
+    
     }
 }

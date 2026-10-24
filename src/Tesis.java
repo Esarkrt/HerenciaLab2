@@ -21,4 +21,8 @@ public class Tesis extends MaterialBibliografico {
     public double getMultaDiaria() {
         return 0.0;
     }
+    @Override
+    public String getTipoMaterial() {
+        return "Tesis";
+    }
 }
