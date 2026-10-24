@@ -22,31 +22,51 @@ public class Prestamo {
     }
 
     public MaterialBibliografico getMaterial() {
-        return null;
+        return material;
     }
 
     public Calendar getFechaPrestamo() {
-        return null;
+        return (Calendar) fechaPrestamo.clone();
     }
 
     public Calendar getFechaPrevistaDevolucion() {
-        return null;
+        return (Calendar) fechaPrevistaDevolucion.clone();
     }
 
     public Calendar getFechaDevolucion() {
-        return null;
+        if(fechaDevolucion == null){
+            return null;
+        }
+        return (Calendar) fechaDevolucion.clone();
     }
 
     public boolean isDevuelto() {
-        return false;
+        return devuelto;
     }
 
     public double getMulta() {
-        return 0.0;
+        return multa;
     }
 
     public int calcularDiasRetraso(Calendar fechaReal) {
+        Calendar limite=(Calendar) fechaPrevistaDevolucion.clone();
+        Calendar real = (Calendar) fechaReal.clone();
+        
+        limite.set(Calendar.HOUR_OF_DAY,0);
+        limite.set(Calendar.MINUTE,0);
+        limite.set(Calendar.SECOND,0);
+        limite.set(Calendar.MILLISECOND, 0);
+        
+        real.set(Calendar.HOUR_OF_DAY,0);
+        real.set(Calendar.MINUTE,0);
+        real.set(Calendar.SECOND,0);
+        real.set(Calendar.MILLISECOND, 0);
+        
+        long diferencia = real.getTimeInMillis()-limite.getTimeInMillis();
+        if(diferencia<=0){
         return 0;
+        }
+        return (int) Math.ceil(diferencia /(1000*60*60*24));
     }
 
     public double registrarDevolucion() {
