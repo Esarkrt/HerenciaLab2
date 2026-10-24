@@ -22,7 +22,8 @@ public class VentanaPrincipal extends JFrame {
     private SimpleDateFormat dateFormat;
     private JLabel lblDatoEspecifico;
     private JLabel lblImagen;
-
+    private DefaultTableModel modeloTablaPrestamos;
+    private JTable tablaPrestamos;
     private JTable tablaMateriales;
     private DefaultTableModel modelo;
     private JTabbedPane tabbedPane;
@@ -34,6 +35,8 @@ public class VentanaPrincipal extends JFrame {
     private JButton btnExamImagen;
     private JTextField txtBusquedaCodigo;
     private JTextArea txtResultadoBusqueda;
+   
+    
     public VentanaPrincipal() {
         biblioteca=new Biblioteca();
         dateFormat=new SimpleDateFormat();
@@ -44,6 +47,8 @@ public class VentanaPrincipal extends JFrame {
         
         tabbedPane=new JTabbedPane();
         tabbedPane.addTab("Registro", crearPanelRegistro());
+        tabbedPane.addTab("Inventario y Búsqueda", crearPaneldeBusqueda());
+        tabbedPane.addTab("Préstamos", crearPanelPrestamos());
         
         add(tabbedPane);
         actualizarTabla();
@@ -221,6 +226,52 @@ public class VentanaPrincipal extends JFrame {
 
         return panel;
     }
+    private JPanel crearPanelPrestamos() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JPanel panelAccion = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        panelAccion.setBorder(BorderFactory.createTitledBorder("Registrar Préstamo"));
+        JButton btnPrestar = new JButton("Prestar Material Seleccionado");
+        panelAccion.add(new JLabel("Seleccione un material disponible en la tabla y presione el botón:"));
+        panelAccion.add(btnPrestar);
+
+        panel.add(panelAccion, BorderLayout.NORTH);
+
+        modeloTablaPrestamos = new DefaultTableModel(new String[]{"Código", "Título", "Tipo", "Plazo (días)", "Multa/Día", "Disponible"}, 0);
+        JTable tablaPrestamoMateriales = new JTable(modeloTablaPrestamos);
+        JScrollPane scroll = new JScrollPane(tablaPrestamoMateriales);
+        scroll.setBorder(BorderFactory.createTitledBorder("Materiales Registrados"));
+
+        panel.add(scroll, BorderLayout.CENTER);
+
+        btnPrestar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int filaSeleccionada = tablaPrestamoMateriales.getSelectedRow();
+                if (filaSeleccionada == -1) {
+                    JOptionPane.showMessageDialog(VentanaPrincipal.this, "Seleccione un material de la tabla.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                String codigo = (String) modeloTablaPrestamos.getValueAt(filaSeleccionada, 0);
+                try {
+                    Prestamo p = biblioteca.prestarMaterial(codigo);
+                    String fechaPrevistaStr = dateFormat.format(p.getFechaPrevistaDevolucion().getTime());
+                    JOptionPane.showMessageDialog(VentanaPrincipal.this, 
+                        "Préstamo registrado exitosamente\n" +
+                        "Material: " + p.getMaterial().getTitulo() + "\n" +
+                        "Plazo: " + p.getMaterial().getPlazoPrestamo() + " días\n" +
+                        "Fecha Prevista de Devolución: " + fechaPrevistaStr, 
+                        "Préstamo Exitoso", JOptionPane.INFORMATION_MESSAGE);
+                    actualizarTabla();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(VentanaPrincipal.this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        return panel;
+    }
 
     private void configurarEventos() {
     }
@@ -245,7 +296,37 @@ public class VentanaPrincipal extends JFrame {
     }
 
     private void actualizarTabla() {
+        if (modeloTablaMateriales != null) {
+            modeloTablaMateriales.setRowCount(0);
+            List<MaterialBibliografico> lista = biblioteca.getMateriales();
+            for (int i = 0; i < lista.size(); i++) {
+                MaterialBibliografico m = lista.get(i);
+                String detalle = "";
+                if (m instanceof Libro) detalle = "Autor: " + ((Libro) m).getAutor();
+                else if (m instanceof Revista) detalle = "Edición: " + ((Revista) m).getNumeroEdicion();
+                else if (m instanceof Tesis) detalle = "Tesista: " + ((Tesis) m).getTesista();
+
+                modeloTablaMateriales.addRow(new Object[]{
+                    m.getCodigo(), m.getTitulo(), m.getTipoMaterial(), m.getAnioPublicacion(),
+                    m.isDisponible() ? "Sí" : "No", detalle, m.getRutaImagen()
+                });
+            }
+        }
+
+        if (modeloTablaPrestamos != null) {
+            modeloTablaPrestamos.setRowCount(0);
+            List<MaterialBibliografico> lista = biblioteca.getMateriales();
+            for (int i = 0; i < lista.size(); i++) {
+                MaterialBibliografico m = lista.get(i);
+                modeloTablaPrestamos.addRow(new Object[]{
+                    m.getCodigo(), m.getTitulo(), m.getTipoMaterial(),
+                    m.getPlazoPrestamo(), "$" + String.format("%.2f", m.getMultaDiaria()),
+                    m.isDisponible() ? "Sí" : "No"
+                });
+            }
+        }
     }
+    
 
     private void limpiarCampos() {
     }
