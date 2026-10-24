@@ -11,6 +11,14 @@ public class Prestamo {
     private double multa;
 
     public Prestamo(MaterialBibliografico material) {
+        this.material = material;
+        fechaPrestamo = Calendar.getInstance();
+        
+        fechaPrevistaDevolucion = (Calendar) fechaPrestamo.clone();
+        fechaPrevistaDevolucion.add(Calendar.DAY_OF_YEAR, material.getPlazoPrestamo());
+        fechaDevolucion = null;
+        devuelto = false;
+        multa = 0.0;
     }
 
     public MaterialBibliografico getMaterial() {
