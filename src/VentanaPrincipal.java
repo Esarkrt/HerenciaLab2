@@ -245,7 +245,6 @@ public class VentanaPrincipal extends JFrame {
 
         panel.add(panelAccion, BorderLayout.NORTH);
 
-        modeloTablaPrestamos = new DefaultTableModel(new String[]{"Código", "Título", "Tipo", "Plazo (días)", "Multa/Día", "Disponible"}, 0);
         JTable tablaPrestamoMateriales = new JTable(modeloTablaPrestamos);
         JScrollPane scroll = new JScrollPane(tablaPrestamoMateriales);
         scroll.setBorder(BorderFactory.createTitledBorder("Materiales Registrados"));
