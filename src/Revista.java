@@ -9,6 +9,8 @@ public class Revista extends MaterialBibliografico {
         this.numeroEdicion = numeroEdicion;
     }
 
+
+
     public int getNumeroEdicion() {
         return numeroEdicion;
     }
