@@ -41,23 +41,55 @@ public class Biblioteca {
     }
 
     public MaterialBibliografico buscarPorCodigo(String codigo) {
+        if (codigo == null || codigo.trim().isEmpty()) {
         return null;
+   }
+        return buscarRecursivo(codigo.trim(), 0);
     }
 
-    private MaterialBibliografico buscarRecursivo(
-            String codigo, int indice) {
+    private MaterialBibliografico buscarRecursivo( String codigo, int indice) {
+         if (indice >= materiales.size()) {
+        return null;
+    }
+    MaterialBibliografico material = materiales.get(indice);
+
+    if (material.getCodigo().equalsIgnoreCase(codigo)) {
+        return buscarRecursivo(codigo, indice + 1);
+    }
         return null;
     }
 
     public Prestamo buscarPrestamoActivo(String codigo) {
+         for (int i = prestamos.size() - 1; i >= 0; i--) {
+        Prestamo prestamo = prestamos.get(i);
+        if (prestamo.getMaterial().getCodigo().equalsIgnoreCase(codigo)&& !prestamo.isDevuelto()) {
+            return prestamo;
+        }
+    }
         return null;
     }
 
     public Prestamo prestarMaterial(String codigo) {
-        return null;
+        MaterialBibliografico material = buscarPorCodigo(codigo);
+
+    if (material == null) {
+        throw new IllegalArgumentException("El material no existe");
+    }
+    if (!material.isDisponible()) {
+        throw new IllegalStateException( "El material no está disponible");
+    }
+    Prestamo prestamo = new Prestamo(material);
+
+    material.setDisponible(false);prestamos.add(prestamo);
+        return prestamo;
     }
 
     public double devolverMaterial(String codigo) {
-        return 0.0;
+        Prestamo prestamo = buscarPrestamoActivo(codigo);
+
+    if (prestamo == null) {
+        throw new IllegalStateException("No hay un prestamo activo para este material");
+    }
+        return  prestamo.registrarDevolucion();
     }
 }
