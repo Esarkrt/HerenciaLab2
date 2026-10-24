@@ -70,6 +70,14 @@ public class Prestamo {
     }
 
     public double registrarDevolucion() {
-        return 0.0;
+        if(devuelto){
+            throw new IllegalStateException("El prestamo ya fue devuelto");
+        }
+        fechaDevolucion = Calendar.getInstance();
+        int diasRetraso = calcularDiasRetraso(fechaDevolucion);
+        multa = material.calcularMulta(diasRetraso);
+        devuelto = true;
+        material.setDisponible(true);
+        return multa;
     }
 }
