@@ -9,29 +9,34 @@ public class MaterialBibliografico {
 
     public MaterialBibliografico(String codigo, String titulo,
             int anioPublicacion, String rutaImagen) {
+        this.codigo = codigo;
+        this.titulo = titulo;
+        this.anioPublicacion = anioPublicacion;
+        this.disponible = true;
     }
 
     public String getCodigo() {
-        return null;
+        return codigo;
     }
 
     public String getTitulo() {
-        return null;
+        return titulo;
     }
 
     public int getAnioPublicacion() {
-        return 0;
+        return anioPublicacion;
     }
 
     public boolean isDisponible() {
-        return false;
+        return disponible;
     }
 
     public String getRutaImagen() {
-        return null;
+        return rutaImagen;
     }
 
     public void setDisponible(boolean disponible) {
+        this.disponible = disponible;
     }
 
     public int getPlazoPrestamo() {
