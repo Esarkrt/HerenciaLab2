@@ -6,19 +6,20 @@ public class Libro extends MaterialBibliografico {
     public Libro(String codigo, String titulo, int anioPublicacion,
             String autor, String rutaImagen) {
         super(codigo, titulo, anioPublicacion, rutaImagen);
+        this.autor = autor;
     }
 
     public String getAutor() {
-        return null;
+        return autor;
     }
 
     @Override
     public int getPlazoPrestamo() {
-        return 0;
+        return 14;
     }
 
     @Override
     public double getMultaDiaria() {
-        return 0.0;
+        return 1.50;
     }
 }
