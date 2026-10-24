@@ -6,19 +6,20 @@ public class Revista extends MaterialBibliografico {
     public Revista(String codigo, String titulo, int anioPublicacion,
             int numeroEdicion, String rutaImagen) {
         super(codigo, titulo, anioPublicacion, rutaImagen);
+        this.numeroEdicion = numeroEdicion;
     }
 
     public int getNumeroEdicion() {
-        return 0;
+        return numeroEdicion;
     }
 
     @Override
     public int getPlazoPrestamo() {
-        return 0;
+        return 7;
     }
 
     @Override
     public double getMultaDiaria() {
-        return 0.0;
+        return 0.75;
     }
 }
