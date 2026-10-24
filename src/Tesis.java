@@ -6,20 +6,21 @@ public class Tesis extends MaterialBibliografico {
     public Tesis(String codigo, String titulo, int anioPublicacion,
             String tesista, String rutaImagen) {
         super(codigo, titulo, anioPublicacion, rutaImagen);
+        this.tesista=tesista;
     }
 
     public String getTesista() {
-        return null;
+        return tesista;
     }
 
     @Override
     public int getPlazoPrestamo() {
-        return 0;
+        return 3;
     }
 
     @Override
     public double getMultaDiaria() {
-        return 0.0;
+        return 3.0;
     }
     @Override
     public String getTipoMaterial() {
